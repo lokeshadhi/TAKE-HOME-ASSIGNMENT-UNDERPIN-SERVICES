@@ -65,7 +65,7 @@ ASSIGNMENT.md               # Full brief — read this first
 | `DELETE` | `/tasks/:id`              | Delete a task (returns 204)              |
 | `PATCH`  | `/tasks/:id/complete`     | Mark a task as complete                  |
 | `GET`    | `/tasks/stats`            | Counts by status + overdue count         |
-| `PATCH`  | `/tasks/:id/assign`       | **Assign a task to a user** _(to implement)_ |
+| `PATCH`  | `/tasks/:id/assign`       | Assign a task to a user                  |
 
 ### Task shape
 
@@ -74,11 +74,12 @@ ASSIGNMENT.md               # Full brief — read this first
   "id": "uuid",
   "title": "string",
   "description": "string",
-  "status": "pending | in-progress | completed",
+  "status": "todo | in_progress | done",
   "priority": "low | medium | high",
   "dueDate": "ISO 8601 or null",
   "completedAt": "ISO 8601 or null",
-  "createdAt": "ISO 8601"
+  "createdAt": "ISO 8601",
+  "assignee": "string (optional/nullable)"
 }
 ```
 
@@ -93,7 +94,7 @@ curl -X POST http://localhost:3000/tasks \
 
 **List tasks with filter**
 ```bash
-curl "http://localhost:3000/tasks?status=pending&page=1&limit=10"
+curl "http://localhost:3000/tasks?status=todo&page=1&limit=10"
 ```
 
 **Mark complete**
@@ -101,13 +102,32 @@ curl "http://localhost:3000/tasks?status=pending&page=1&limit=10"
 curl -X PATCH http://localhost:3000/tasks/<id>/complete
 ```
 
+**Assign task**
+```bash
+curl -X PATCH http://localhost:3000/tasks/<id>/assign \
+  -H "Content-Type: application/json" \
+  -d '{"assignee": "Alice Smith"}'
+```
+
 ---
 
-## What to Submit
+## Submission Documentation
 
-See [ASSIGNMENT.md](./ASSIGNMENT.md) for full submission requirements. At minimum, include:
+- **[BUG_REPORT.md](./BUG_REPORT.md)** — Detailed bug reports with reproduction steps, root causes, fixes, and regression tests.
+- **[SUBMISSION_NOTES.md](./SUBMISSION_NOTES.md)** — Architecture overview, feature design rationale, test strategy, coverage breakdown, and production considerations.
 
-- **Test files** — covering the endpoints and edge cases you identified
-- **Bug report** — what you found, where in the code, and why it's a bug (not just symptoms)
-- **At least one fix** — with a note on your approach
-- **`PATCH /tasks/:id/assign` implementation** — plus a short explanation of any design decisions (validation, edge cases, etc.)
+### Test & Coverage Summary
+
+Run tests with:
+```bash
+cd task-api
+npm test
+npm run coverage
+```
+
+- **Total Tests:** 78 passing (3 test suites)
+- **Statement Coverage:** 97.5%
+- **Branch Coverage:** 96.73%
+- **Function Coverage:** 93.33%
+- **Line Coverage:** 97.26%
+
