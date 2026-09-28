@@ -3,7 +3,7 @@
 ## 1. Executive Summary
 
 This submission completes all requirements for the Take-Home Assignment:
-- **Comprehensive Test Suite:** 78 automated tests (both unit and integration tests) using Jest and Supertest, achieving **97.5% statement coverage** across the application.
+- **Comprehensive Test Suite:** 86 automated tests (both unit and integration tests) using Jest and Supertest, achieving **97.5% statement coverage** across the application with at least 2 genuine behavioral edge cases for every endpoint.
 - **Bug Fixes & Regressions:** Identified and fixed 4 concrete bugs (including pagination off-by-one, priority corruption on completion, and status substring matching), each backed by failing regression tests.
 - **New Feature:** Implemented `PATCH /tasks/:id/assign` following the existing route -> validation -> service architecture, with full test coverage for happy paths, validation errors, resource errors, and reassignments.
 

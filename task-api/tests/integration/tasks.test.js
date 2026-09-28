@@ -85,6 +85,22 @@ describe('Tasks API Endpoints (Integration Tests)', () => {
       expect(res2.body).toHaveLength(1);
       expect(res2.body[0].title).toBe('T3');
     });
+
+    it('should return an empty array when filtering by a status with no matching tasks', async () => {
+      taskService.create({ title: 'Todo Task', status: 'todo' });
+
+      const res = await request(app).get('/tasks?status=done');
+      expect(res.status).toBe(200);
+      expect(res.body).toEqual([]);
+    });
+
+    it('should return an empty array when requested page exceeds total task count', async () => {
+      taskService.create({ title: 'Task 1' });
+
+      const res = await request(app).get('/tasks?page=10&limit=5');
+      expect(res.status).toBe(200);
+      expect(res.body).toEqual([]);
+    });
   });
 
   describe('POST /tasks', () => {
@@ -271,6 +287,17 @@ describe('Tasks API Endpoints (Integration Tests)', () => {
       expect(res.status).toBe(404);
       expect(res.body.error).toBe('Task not found');
     });
+
+    it('should return 404 when attempting to delete the same task twice', async () => {
+      const created = taskService.create({ title: 'To Delete Twice' });
+
+      const res1 = await request(app).delete(`/tasks/${created.id}`);
+      expect(res1.status).toBe(204);
+
+      const res2 = await request(app).delete(`/tasks/${created.id}`);
+      expect(res2.status).toBe(404);
+      expect(res2.body.error).toBe('Task not found');
+    });
   });
 
   describe('PATCH /tasks/:id/complete', () => {
@@ -290,6 +317,20 @@ describe('Tasks API Endpoints (Integration Tests)', () => {
       const res = await request(app).patch('/tasks/non-existent-id/complete');
       expect(res.status).toBe(404);
       expect(res.body.error).toBe('Task not found');
+    });
+
+    it('should remain completed when marking an already completed task as complete again', async () => {
+      const created = taskService.create({ title: 'Already Done', priority: 'high' });
+      const firstComplete = await request(app).patch(`/tasks/${created.id}/complete`);
+      expect(firstComplete.status).toBe(200);
+      expect(firstComplete.body.status).toBe('done');
+
+      const secondComplete = await request(app).patch(`/tasks/${created.id}/complete`);
+      expect(secondComplete.status).toBe(200);
+      expect(secondComplete.body.id).toBe(created.id);
+      expect(secondComplete.body.status).toBe('done');
+      expect(secondComplete.body.priority).toBe('high');
+      expect(secondComplete.body.completedAt).toBeDefined();
     });
   });
 
@@ -385,6 +426,27 @@ describe('Tasks API Endpoints (Integration Tests)', () => {
         done: 1,
         overdue: 1,
       });
+    });
+
+    it('should return 200 with all zero counts when no tasks exist', async () => {
+      const res = await request(app).get('/tasks/stats');
+      expect(res.status).toBe(200);
+      expect(res.body).toEqual({
+        todo: 0,
+        in_progress: 0,
+        done: 0,
+        overdue: 0,
+      });
+    });
+
+    it('should not count completed tasks with past due dates as overdue', async () => {
+      const pastDate = new Date(Date.now() - 3600000).toISOString();
+      taskService.create({ title: 'Completed Past Due', status: 'done', dueDate: pastDate });
+
+      const res = await request(app).get('/tasks/stats');
+      expect(res.status).toBe(200);
+      expect(res.body.done).toBe(1);
+      expect(res.body.overdue).toBe(0);
     });
   });
 });

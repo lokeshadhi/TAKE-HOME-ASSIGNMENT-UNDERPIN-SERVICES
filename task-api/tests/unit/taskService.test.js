@@ -216,6 +216,12 @@ describe('taskService (Unit Tests)', () => {
       const result = taskService.remove('non-existent-id');
       expect(result).toBe(false);
     });
+
+    it('should return false when attempting to remove the same task twice', () => {
+      const task = taskService.create({ title: 'Delete Twice' });
+      expect(taskService.remove(task.id)).toBe(true);
+      expect(taskService.remove(task.id)).toBe(false);
+    });
   });
 
   describe('completeTask', () => {
@@ -241,6 +247,17 @@ describe('taskService (Unit Tests)', () => {
     it('should return null when task id is not found', () => {
       const result = taskService.completeTask('non-existent-id');
       expect(result).toBeNull();
+    });
+
+    it('should maintain done status when called repeatedly on already completed task', () => {
+      const task = taskService.create({ title: 'Complete Twice', priority: 'high' });
+      const first = taskService.completeTask(task.id);
+      expect(first.status).toBe('done');
+
+      const second = taskService.completeTask(task.id);
+      expect(second.status).toBe('done');
+      expect(second.priority).toBe('high');
+      expect(second.completedAt).toBeDefined();
     });
   });
 

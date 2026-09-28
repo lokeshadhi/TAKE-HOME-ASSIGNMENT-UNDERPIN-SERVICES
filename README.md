@@ -125,7 +125,7 @@ npm test
 npm run coverage
 ```
 
-- **Total Tests:** 78 passing (3 test suites)
+- **Total Tests:** 86 passing (3 test suites)
 - **Statement Coverage:** 97.5%
 - **Branch Coverage:** 96.73%
 - **Function Coverage:** 93.33%
